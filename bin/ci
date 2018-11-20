@@ -3,4 +3,4 @@
 set -e
 
 bin/quality
-bundle/rspec
+bin/rspec

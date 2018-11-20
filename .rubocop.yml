@@ -26,9 +26,12 @@ Metrics/BlockLength:
     - spec/**/*.rb
 
 RSpec/ImplicitSubject:
-  Enabled: false    
+  Enabled: false
 
 RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/MultipleExpectations:
   Enabled: false
 
 RSpec/MessageSpies:
