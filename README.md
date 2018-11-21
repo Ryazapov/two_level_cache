@@ -24,7 +24,7 @@ Or install it yourself as:
 
 ## Usage
 
-Initialize Two Level Cache Store. You can pass all parameters available for MemoryStore(https://api.rubyonrails.org/classes/ActiveSupport/Cache/MemoryStore.html) and FileStore(https://api.rubyonrails.org/classes/ActiveSupport/Cache/FileStore.html)
+Initialize Two Level Cache Store. You can pass all parameters available for [MemoryStore](https://api.rubyonrails.org/classes/ActiveSupport/Cache/MemoryStore.html) and [FileStore](https://api.rubyonrails.org/classes/ActiveSupport/Cache/FileStore.html)
 
 ```ruby
 store = TwoLevelCache::Store.new(cache_path: "tmp/cache")
