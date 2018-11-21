@@ -5,6 +5,22 @@ RSpec.describe TwoLevelCache::Store do
 
   let(:cache_path) { "tmp/cache" }
 
+  describe "#write" do
+    subject(:write) { store.write("city", "Moscow") }
+
+    it "writes Moscow to 'city' key" do
+      expect { write }.to change { store.read("city") }.from(nil).to("Moscow")
+    end
+
+    context "when memory store is full" do
+      let(:store) { described_class.new(size: 0.byte, cache_path: cache_path) }
+
+      it "writes Moscow to 'city' key" do
+        expect { write }.to change { store.read("city") }.from(nil).to("Moscow")
+      end
+    end
+  end
+
   describe "#read" do
     subject(:read) { store.read("city") }
 
@@ -16,41 +32,21 @@ RSpec.describe TwoLevelCache::Store do
       it { is_expected.to eq "Moscow" }
 
       context "and entry has been expired" do
-        before { store.write("city", "Moscow", expires_in: 3) }
+        before do
+          store.write("city", "Moscow", expires_in: 3)
 
-        it "returns nil" do
-          Timecop.freeze(3.seconds.since) do
-            is_expected.to eq nil
-          end
+          Timecop.travel(3.seconds.since)
         end
+
+        it { is_expected.to be_nil }
       end
 
-      context "and data contains in file store" do
+      context "and key exists in file store" do
         let(:store) { described_class.new(size: 0.byte, cache_path: cache_path) }
 
         before { store.write("city", "Moscow") }
 
         it { is_expected.to eq "Moscow" }
-      end
-    end
-  end
-
-  describe "#write" do
-    subject(:write) { store.write("city", "Moscow") }
-
-    it "writes Moscow to 'city' key" do
-      is_expected.to be_truthy
-
-      expect(store.read("city")).to eq "Moscow"
-    end
-
-    context "when memory store is full" do
-      let(:store) { described_class.new(size: 0.byte, cache_path: cache_path) }
-
-      it "writes Moscow to 'city' key" do
-        is_expected.to be_truthy
-
-        expect(store.read("city")).to eq "Moscow"
       end
     end
   end
@@ -61,12 +57,10 @@ RSpec.describe TwoLevelCache::Store do
     it { is_expected.to be_falsey }
 
     context "when store contains 'city' key" do
-      before { store.write("city", "Moscow"); }
+      before { store.write("city", "Moscow") }
 
       it "deletes 'city' key" do
-        is_expected.to be_truthy
-
-        expect(store.read("city")).to be_nil
+        expect { delete }.to change { store.read("city") }.from("Moscow").to(nil)
       end
     end
   end
@@ -132,27 +126,24 @@ RSpec.describe TwoLevelCache::Store do
     before do
       store.write("kazan", "Kazan")
       store.write("berlin", "Berlin", expires_in: 3)
+      Timecop.travel(3.seconds.since)
     end
 
     it "cleanups memory store" do
-      Timecop.freeze(3.seconds.since) do
-        cleanup
+      cleanup
 
-        expect(store.read("kazan")).to eq "Kazan"
-        expect(store.read("berlin")).to be_nil
-      end
+      expect(store.read("kazan")).to eq "Kazan"
+      expect(store.read("berlin")).to be_nil
     end
 
     context "when memory store is full" do
       let(:store) { described_class.new(size: 0.byte, cache_path: cache_path) }
 
       it "cleanups file store" do
-        Timecop.freeze(3.seconds.since) do
-          cleanup
+        cleanup
 
-          expect(store.read("kazan")).to eq "Kazan"
-          expect(store.read("berlin")).to be_nil
-        end
+        expect(store.read("kazan")).to eq "Kazan"
+        expect(store.read("berlin")).to be_nil
       end
     end
   end
@@ -177,6 +168,30 @@ RSpec.describe TwoLevelCache::Store do
         let(:store) { described_class.new(size: 0.byte, cache_path: cache_path) }
 
         it { is_expected.to eq 2 }
+      end
+    end
+  end
+
+  describe "#decrement" do
+    subject(:decrement) { store.decrement("count") }
+
+    it { is_expected.to be_nil }
+
+    context "when store contains 'count' key" do
+      before { store.write("count", 2) }
+
+      it { is_expected.to eq 1 }
+
+      context "and value is string" do
+        before { store.write("count", "one") }
+
+        it { is_expected.to eq(-1) }
+      end
+
+      context "and memory store is full" do
+        let(:store) { described_class.new(size: 0.byte, cache_path: cache_path) }
+
+        it { is_expected.to eq 1 }
       end
     end
   end

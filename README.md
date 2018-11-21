@@ -2,16 +2,16 @@
 
 [![Build Status](https://travis-ci.org/Ryazapov/two_level_cache.svg?branch=master)](https://travis-ci.org/Ryazapov/two_level_cache)
 
-A cache store implementation which has two levels in first level it stores everything into memory in the same process and in second level it stores everything on the filesystem.
+A cache store implementation which has two levels. In the first level it stores everything into memory in the same process and in the second level it stores everything on the filesystem.
 
-This first level has a bounded size specified by the :size options to the initializer (default is 32Mb). When the first level exceeds the allotted size, a cleanup will occur which move to the second level store down to three quarters of the maximum size by moving the least recently used entries.
+The first level has a bounded size specified by the `:size` options to the initializer (default is 32Mb). When the first level exceeds the allotted size, a cleanup will occur which move to the second level store down to three quarters of the maximum size by moving the least recently used entries.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'two_level_cache'
+gem "two_level_cache"
 ```
 
 And then execute:
