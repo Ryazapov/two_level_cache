@@ -1,6 +1,5 @@
 require "two_level_cache/version"
 require "active_support/cache"
-require "pry"
 
 module TwoLevelCache
   class Store < ActiveSupport::Cache::MemoryStore
