@@ -33,10 +33,17 @@ module TwoLevelCache
     attr_reader :file_store
 
     def read_entry(key, options)
-      super || file_store.send(:read_entry, file_store_normalize_key(key, options), options)
+      entry = super
+
+      if entry.nil?
+        entry = file_store.send(:read_entry, file_store_normalize_key(key, options), options)
+        write_entry(key, entry, {}) if entry
+      end
+
+      entry
     end
 
-    def write_entry(key, value, options)
+    def write_entry(key, entry, options)
       file_store.delete(key, options)
 
       super

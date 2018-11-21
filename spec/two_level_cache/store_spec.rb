@@ -72,9 +72,9 @@ RSpec.describe TwoLevelCache::Store do
   end
 
   describe "#prune" do
-    subject(:prune) { store.prune("city") }
+    subject(:prune) { store.prune(0.5.megabyte) }
 
-    let(:store) { described_class.new(size: 100.byte, cache_path: cache_path) }
+    let(:store) { described_class.new(size: 1.megabyte, cache_path: cache_path) }
 
     before do
       store.write("moscow", "Moscow")
@@ -84,7 +84,7 @@ RSpec.describe TwoLevelCache::Store do
     end
 
     it "moves values to file store" do
-      is_expected.to be_truthy
+      prune
 
       expect(store.read("moscow")).to eq "Moscow"
       expect(store.read("kazan")).to eq "Kazan"
