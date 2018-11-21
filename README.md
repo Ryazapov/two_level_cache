@@ -2,9 +2,9 @@
 
 [![Build Status](https://travis-ci.org/Ryazapov/two_level_cache.svg?branch=master)](https://travis-ci.org/Ryazapov/two_level_cache)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/two_level_cache`. To experiment with that code, run `bin/console` for an interactive prompt.
+A cache store implementation which has two levels in first level it stores everything into memory in the same process and in second level it stores everything on the filesystem.
 
-TODO: Delete this and the text above, and describe your gem
+This first level has a bounded size specified by the :size options to the initializer (default is 32Mb). When the first level exceeds the allotted size, a cleanup will occur which move to the second level store down to three quarters of the maximum size by moving the least recently used entries.
 
 ## Installation
 
@@ -24,17 +24,45 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Initialize Two Level Cache Store. You can pass all parameters available for MemoryStore(https://api.rubyonrails.org/classes/ActiveSupport/Cache/MemoryStore.html) and FileStore(https://api.rubyonrails.org/classes/ActiveSupport/Cache/FileStore.html)
 
-## Development
+```ruby
+store = TwoLevelCache::Store.new(cache_path: "tmp/cache")
+```
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Writes item to the store
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```ruby
+store.write("city", "Moscow") # => true
+```
+
+Reads item from the store
+
+```ruby
+store.write("city") # => "Moscow"
+```
+
+Deletes item from the store
+
+```ruby
+store.delete("city") # => true
+```
+
+Deletes all items from the cache.
+
+```ruby
+store.clear
+```
+
+Preemptively iterates through all stored keys and removes the ones which have expired.
+
+```ruby
+store.cleanup
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/two_level_cache.
+Bug reports and pull requests are welcome on GitHub at https://github.com/Ryazapov/two_level_cache.
 
 ## License
 
