@@ -78,7 +78,6 @@ module TwoLevelCache
 
       return unless delete_entry(key, options)
 
-      options = merged_options(options)
       file_store.send(:write_entry, file_store_normalize_key(key, options), entry, options)
     end
 
